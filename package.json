@@ -1,0 +1,25 @@
+{
+  "name": "twinrisk-ai-demo",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "generate-model": "node scripts/generate-sample-glb.mjs",
+    "postinstall": "node scripts/copy-ifc-wasm.mjs"
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.114.6",
+    "@react-three/fiber": "^8.17.10",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "three": "^0.169.0",
+    "web-ifc": "^0.0.77"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.2",
+    "vite": "^5.4.8"
+  }
+}
