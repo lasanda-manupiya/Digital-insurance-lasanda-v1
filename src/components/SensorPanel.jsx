@@ -8,6 +8,7 @@ import {
   SENSOR_STATUSES,
   INSTALLATION_PRIORITIES,
   getSensorTypeMeta,
+  estimateDetectedTemperature,
 } from '../data/sensorTypes.js';
 import { RISK_CATEGORIES } from '../data/riskCategories.js';
 import {
@@ -25,6 +26,34 @@ function Field({ label, children }) {
     <div className="field">
       <label>{label}</label>
       {children}
+    </div>
+  );
+}
+
+
+function SensorSpecCard({ sensorType, coverageRadiusMetres }) {
+  const meta = getSensorTypeMeta(sensorType);
+  const radius = Number(coverageRadiusMetres ?? meta.defaultRadiusMetres) || 0;
+  const example = estimateDetectedTemperature(meta, 40, Math.min(10, radius || 10), 22);
+  const exampleDistance = Math.min(10, radius || 10);
+
+  return (
+    <div className="spec-card">
+      <div className="spec-card-title">{meta.rangeClass} specification</div>
+      <div className="spec-grid">
+        <span>Detection range</span><strong>{radius} m</strong>
+        {meta.minTemperatureC !== undefined && <><span>Temperature span</span><strong>{meta.minTemperatureC}°C to {meta.maxTemperatureC}°C</strong></>}
+        {meta.accuracyC !== undefined && <><span>Accuracy</span><strong>±{meta.accuracyC}°C</strong></>}
+        <span>Response time</span><strong>{meta.responseTimeSeconds}s</strong>
+        {meta.fieldOfViewDegrees && <><span>Field of view</span><strong>{meta.fieldOfViewDegrees}°</strong></>}
+        {meta.resolution && <><span>Resolution</span><strong>{meta.resolution}</strong></>}
+      </div>
+      {example && (
+        <p className="hint spec-example">
+          Example: a 40°C heat source {exampleDistance} m away in 22°C ambient air is estimated at {example.detectedTemperatureC}°C
+          {example.inRange ? ` (${example.deltaFromAmbientC}°C above ambient).` : ' because it is outside the selected range.'}
+        </p>
+      )}
     </div>
   );
 }
@@ -61,6 +90,7 @@ function PlaceTab({ sensors, selectedSensor, interactionMode, onTogglePlaceMode,
       <p className="hint">
         {getSensorTypeMeta(selectedTypeForPlace).guidance}
       </p>
+      <SensorSpecCard sensorType={selectedTypeForPlace} />
       <button
         className={placing ? 'btn btn-active' : 'btn btn-primary'}
         style={{ width: '100%', margin: '10px 0' }}
@@ -111,7 +141,7 @@ function EditTab({ selectedSensor, onUpdate, onDelete }) {
 
   const handleTypeChange = (type) => {
     const meta = getSensorTypeMeta(type);
-    set({ type, riskCategory: meta.riskCategory });
+    set({ type, riskCategory: meta.riskCategory, coverageRadiusMetres: meta.defaultRadiusMetres });
   };
 
   const flashSaved = () => {
@@ -124,6 +154,7 @@ function EditTab({ selectedSensor, onUpdate, onDelete }) {
       <p className="hint" style={{ marginBottom: 8 }}>
         Editing: <strong>{selectedSensor.id}</strong>
       </p>
+      <SensorSpecCard sensorType={selectedSensor.type} coverageRadiusMetres={selectedSensor.coverageRadiusMetres} />
 
       <Field label="Sensor name">
         <input value={selectedSensor.name} onChange={(e) => set({ name: e.target.value })} />
