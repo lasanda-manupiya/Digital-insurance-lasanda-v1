@@ -67,10 +67,10 @@ export function generateRiotRecommendations(frames, config, sensors) {
   const p = config.params ?? {};
 
   const secSensors = sensors.filter((s) =>
-    ['Security Sensor', 'CCTV Coverage Sensor', 'Access Route Sensor'].includes(s.type)
+    s.type.startsWith('Visual Camera')
   );
   if (secSensors.length < 2) {
-    recs.push({ priority: 'High', text: 'Insufficient security sensors near entry points. Add security and CCTV sensors.' });
+    recs.push({ priority: 'High', text: 'Insufficient security sensors near entry points. Add visual camera coverage.' });
   }
   if ((Number(p.securityResponseTime) || 5) > 5) {
     recs.push({ priority: 'Medium', text: `Security response time of ${p.securityResponseTime} min — faster response reduces affected area.` });

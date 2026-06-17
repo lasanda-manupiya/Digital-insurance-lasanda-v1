@@ -2,38 +2,22 @@
 // Each sensor type maps to the emergency types it can detect.
 
 const SENSOR_DETECTS = {
-  'Fire Sensor':          ['fire'],
-  'Heat Sensor':          ['fire', 'explosion'],
-  'Smoke Sensor':         ['fire', 'gasLeak'],
-  'Temperature Sensor':   ['fire'],
-  'Gas Sensor':           ['gasLeak'],
-  'Flood Sensor':         ['flood'],
-  'Water Leak Sensor':    ['flood'],
-  'Security Sensor':      ['riot'],
-  'CCTV Coverage Sensor': ['riot'],
-  'Structural Sensor':    ['explosion'],
-  'Access Route Sensor':  ['fire', 'flood', 'riot', 'explosion'],
-  'Power Failure Sensor': ['explosion'],
-  'Air Quality Sensor':   ['fire', 'gasLeak'],
-  'Humidity Sensor':      ['flood'],
+  'Heat Sensor - Short Range':    ['fire', 'explosion'],
+  'Heat Sensor - Long Range':     ['fire', 'explosion'],
+  'Thermal Camera - Short Range': ['fire', 'explosion'],
+  'Thermal Camera - Long Range':  ['fire', 'explosion'],
+  'Visual Camera - Short Range':  ['riot'],
+  'Visual Camera - Long Range':   ['riot'],
 };
 
 // Seconds from the moment the hazard reaches the sensor until the sensor reports it
 const SENSOR_RESPONSE_DELAY_S = {
-  'Fire Sensor':          5,
-  'Heat Sensor':          15,
-  'Smoke Sensor':         8,
-  'Temperature Sensor':   20,
-  'Gas Sensor':           10,
-  'Flood Sensor':         3,
-  'Water Leak Sensor':    5,
-  'Security Sensor':      2,
-  'CCTV Coverage Sensor': 1,
-  'Structural Sensor':    30,
-  'Access Route Sensor':  5,
-  'Power Failure Sensor': 1,
-  'Air Quality Sensor':   25,
-  'Humidity Sensor':      60,
+  'Heat Sensor - Short Range':    8,
+  'Heat Sensor - Long Range':     12,
+  'Thermal Camera - Short Range': 3,
+  'Thermal Camera - Long Range':  4,
+  'Visual Camera - Short Range':  1,
+  'Visual Camera - Long Range':   1,
 };
 
 // Approximate hazard propagation speed in metres/second for each emergency type

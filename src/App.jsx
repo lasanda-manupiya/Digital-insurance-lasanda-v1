@@ -63,7 +63,7 @@ export default function App() {
   // ---- sensor state ----
   const [sensors,           setSensors]           = useState(() => loadSensors());
   const [selectedSensorId,  setSelectedSensorId]  = useState(null);
-  const [selectedTypeForPlace, setSelectedTypeForPlace] = useState('Heat Sensor');
+  const [selectedTypeForPlace, setSelectedTypeForPlace] = useState('Heat Sensor - Short Range');
 
   // ---- interaction mode ----
   // 'orbit' | 'place' | 'calibrate' | 'incident'

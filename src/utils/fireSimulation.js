@@ -86,10 +86,10 @@ export function generateFireRecommendations(frames, config, sensors) {
   const p = config.params ?? {};
 
   const fireSensors = sensors.filter((s) =>
-    ['Fire Sensor', 'Heat Sensor', 'Smoke Sensor', 'Temperature Sensor'].includes(s.type)
+    s.type.startsWith('Heat Sensor') || s.type.startsWith('Thermal Camera')
   );
   if (fireSensors.length === 0) {
-    recs.push({ priority: 'High', text: 'No fire detection sensors placed. Install heat and smoke detectors.' });
+    recs.push({ priority: 'High', text: 'No fire detection sensors placed. Install heat sensors or thermal cameras.' });
   }
 
   const activated = finalFrame.sensorActivations.filter((a) => a.status === 'Activated');

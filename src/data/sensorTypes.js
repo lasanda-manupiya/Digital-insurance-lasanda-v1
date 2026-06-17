@@ -1,21 +1,97 @@
-// Catalogue of virtual sensor types available in the demo.
-// color is used for the marker and coverage zone, defaultRadiusMetres seeds new sensors,
-// floorBased sensors additionally draw a flat coverage circle on the floor.
+// Catalogue focused on heat sensors and camera options.
+// Each type includes practical specification fields used by the UI to explain
+// range, temperature limits, response behaviour, and example readings.
 export const SENSOR_TYPES = [
-  { label: 'Flood Sensor', riskCategory: 'Flood', color: '#38bdf8', defaultRadiusMetres: 3, floorBased: true, guidance: 'Low level areas, basements, drainage points, water entry points.' },
-  { label: 'Fire Sensor', riskCategory: 'Fire', color: '#f87171', defaultRadiusMetres: 4, floorBased: false, guidance: 'High risk fire zones, storage areas, kitchens.' },
-  { label: 'Heat Sensor', riskCategory: 'Fire', color: '#fb923c', defaultRadiusMetres: 2, floorBased: false, guidance: 'Plant rooms, electrical rooms, boiler rooms, server rooms, machinery.' },
-  { label: 'Temperature Sensor', riskCategory: 'Fire', color: '#fbbf24', defaultRadiusMetres: 3, floorBased: false, guidance: 'Server rooms, plant rooms, cold storage.' },
-  { label: 'Smoke Sensor', riskCategory: 'Fire', color: '#9ca3af', defaultRadiusMetres: 5, floorBased: false, guidance: 'Escape routes, enclosed rooms, corridors, high risk fire zones.' },
-  { label: 'Security Sensor', riskCategory: 'Security', color: '#a78bfa', defaultRadiusMetres: 6, floorBased: false, guidance: 'Entrances, loading bays, blind spots, external access points.' },
-  { label: 'Structural Sensor', riskCategory: 'Structural', color: '#f472b6', defaultRadiusMetres: 3, floorBased: false, guidance: 'Beams, columns, roof structure, high load zones, older structural areas.' },
-  { label: 'Water Leak Sensor', riskCategory: 'Water leakage', color: '#22d3ee', defaultRadiusMetres: 2, floorBased: true, guidance: 'Pipe runs, risers, tanks, wet rooms, plant rooms.' },
-  { label: 'Air Quality Sensor', riskCategory: 'Indoor air quality', color: '#4ade80', defaultRadiusMetres: 5, floorBased: false, guidance: 'Occupied spaces, ventilation zones, enclosed work areas.' },
-  { label: 'Access Route Sensor', riskCategory: 'Access and evacuation', color: '#facc15', defaultRadiusMetres: 4, floorBased: true, guidance: 'Evacuation paths, exits, stairwells, corridors.' },
-  { label: 'Power Failure Sensor', riskCategory: 'Power failure', color: '#fb7185', defaultRadiusMetres: 3, floorBased: false, guidance: 'Switch rooms, distribution boards, UPS rooms, generators.' },
-  { label: 'CCTV Coverage Sensor', riskCategory: 'Security', color: '#818cf8', defaultRadiusMetres: 8, floorBased: false, guidance: 'Entrances, perimeters, loading bays, blind spots.' },
-  { label: 'Gas Sensor', riskCategory: 'Environmental', color: '#34d399', defaultRadiusMetres: 3, floorBased: false, guidance: 'Boiler rooms, gas risers, kitchens, plant rooms.' },
-  { label: 'Humidity Sensor', riskCategory: 'Environmental', color: '#2dd4bf', defaultRadiusMetres: 4, floorBased: false, guidance: 'Basements, archives, server rooms, enclosed voids.' },
+  {
+    label: 'Heat Sensor - Short Range',
+    riskCategory: 'Fire',
+    color: '#fb923c',
+    defaultRadiusMetres: 10,
+    floorBased: false,
+    family: 'Heat sensor',
+    rangeClass: 'Short range',
+    minTemperatureC: -10,
+    maxTemperatureC: 120,
+    accuracyC: 1.5,
+    responseTimeSeconds: 8,
+    attenuationPerMetre: 0.035,
+    guidance: 'Use close to likely heat sources: electrical panels, small plant rooms, kitchens, and machinery bays.',
+  },
+  {
+    label: 'Heat Sensor - Long Range',
+    riskCategory: 'Fire',
+    color: '#f97316',
+    defaultRadiusMetres: 25,
+    floorBased: false,
+    family: 'Heat sensor',
+    rangeClass: 'Long range',
+    minTemperatureC: -20,
+    maxTemperatureC: 200,
+    accuracyC: 2,
+    responseTimeSeconds: 12,
+    attenuationPerMetre: 0.022,
+    guidance: 'Use for larger plant rooms, warehouses, generator rooms, and open industrial spaces.',
+  },
+  {
+    label: 'Thermal Camera - Short Range',
+    riskCategory: 'Fire',
+    color: '#fbbf24',
+    defaultRadiusMetres: 15,
+    floorBased: false,
+    family: 'Camera',
+    rangeClass: 'Short range thermal',
+    minTemperatureC: -20,
+    maxTemperatureC: 150,
+    accuracyC: 2,
+    responseTimeSeconds: 3,
+    fieldOfViewDegrees: 70,
+    resolution: '320 × 240 thermal',
+    attenuationPerMetre: 0.025,
+    guidance: 'Use where the camera needs to see the asset directly: server rooms, panels, short corridors, and compact process areas.',
+  },
+  {
+    label: 'Thermal Camera - Long Range',
+    riskCategory: 'Fire',
+    color: '#ef4444',
+    defaultRadiusMetres: 40,
+    floorBased: false,
+    family: 'Camera',
+    rangeClass: 'Long range thermal',
+    minTemperatureC: -20,
+    maxTemperatureC: 300,
+    accuracyC: 3,
+    responseTimeSeconds: 4,
+    fieldOfViewDegrees: 45,
+    resolution: '640 × 480 thermal',
+    attenuationPerMetre: 0.014,
+    guidance: 'Use for long aisles, warehouses, perimeter heat monitoring, and large open halls where line-of-sight is available.',
+  },
+  {
+    label: 'Visual Camera - Short Range',
+    riskCategory: 'Security',
+    color: '#818cf8',
+    defaultRadiusMetres: 12,
+    floorBased: false,
+    family: 'Camera',
+    rangeClass: 'Short range visual',
+    responseTimeSeconds: 1,
+    fieldOfViewDegrees: 90,
+    resolution: '1080p visible light',
+    guidance: 'Use for doors, counters, close corridors, and indoor areas where visual verification is needed.',
+  },
+  {
+    label: 'Visual Camera - Long Range',
+    riskCategory: 'Security',
+    color: '#6366f1',
+    defaultRadiusMetres: 35,
+    floorBased: false,
+    family: 'Camera',
+    rangeClass: 'Long range visual',
+    responseTimeSeconds: 1,
+    fieldOfViewDegrees: 35,
+    resolution: '4 MP visible light',
+    guidance: 'Use for car parks, perimeter lines, loading bays, and long corridors where zoomed visual coverage is required.',
+  },
 ];
 
 export const SENSITIVITY_LEVELS = ['Low', 'Medium', 'High'];
@@ -24,4 +100,33 @@ export const INSTALLATION_PRIORITIES = ['Low', 'Medium', 'High'];
 
 export function getSensorTypeMeta(label) {
   return SENSOR_TYPES.find((t) => t.label === label) || SENSOR_TYPES[0];
+}
+
+export function isHeatDetectionType(label) {
+  const meta = getSensorTypeMeta(label);
+  return meta.family === 'Heat sensor' || label.startsWith('Thermal Camera');
+}
+
+export function estimateDetectedTemperature(meta, sourceTemperatureC, distanceMetres, ambientTemperatureC = 22) {
+  const source = Number(sourceTemperatureC);
+  const distance = Math.max(0, Number(distanceMetres) || 0);
+  const ambient = Number(ambientTemperatureC);
+
+  if (!Number.isFinite(source) || !Number.isFinite(ambient) || meta.maxTemperatureC === undefined) {
+    return null;
+  }
+
+  if (distance > meta.defaultRadiusMetres) {
+    return { inRange: false, detectedTemperatureC: ambient, deltaFromAmbientC: 0 };
+  }
+
+  const attenuation = Math.exp(-(meta.attenuationPerMetre ?? 0.03) * distance);
+  const detected = ambient + ((source - ambient) * attenuation);
+  const clamped = Math.min(meta.maxTemperatureC, Math.max(meta.minTemperatureC, detected));
+
+  return {
+    inRange: true,
+    detectedTemperatureC: +clamped.toFixed(1),
+    deltaFromAmbientC: +(clamped - ambient).toFixed(1),
+  };
 }
