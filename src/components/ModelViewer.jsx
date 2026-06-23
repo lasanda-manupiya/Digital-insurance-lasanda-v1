@@ -1,5 +1,5 @@
 import { Component, Suspense, useEffect, useRef } from 'react';
-import { Canvas, useThree } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Grid, Html, Line, OrbitControls, useGLTF } from '@react-three/drei';
 import SensorMarker from './SensorMarker.jsx';
 import CoverageZone from './CoverageZone.jsx';
@@ -81,17 +81,44 @@ class ModelErrorBoundary extends Component {
 function ActivatedSensorGlow({ sensor, size }) {
   const meta = getSensorTypeMeta(sensor.type);
   const isAlarm = meta.family === 'Alarm';
+  const pulseRef = useRef(null);
+  const ringRef = useRef(null);
+  const strobeRef = useRef(null);
+
+  useFrame(({ clock }) => {
+    const t = clock.getElapsedTime();
+    const pulse = 1 + Math.sin(t * (isAlarm ? 8 : 5)) * (isAlarm ? 0.32 : 0.18);
+    if (pulseRef.current) pulseRef.current.scale.setScalar(pulse);
+    if (ringRef.current) {
+      const ringPulse = 1 + ((t * 1.8) % 1) * 0.55;
+      ringRef.current.scale.setScalar(ringPulse);
+      ringRef.current.material.opacity = 0.85 - ((t * 1.8) % 1) * 0.55;
+    }
+    if (strobeRef.current) {
+      strobeRef.current.material.opacity = Math.sin(t * 14) > 0 ? 0.95 : 0.25;
+    }
+  });
+
   return (
     <group position={[sensor.position.x, sensor.position.y, sensor.position.z]} raycast={() => null}>
-      <mesh>
+      <mesh ref={pulseRef}>
         <sphereGeometry args={[size * (isAlarm ? 3.2 : 2.2), 16, 16]} />
         <meshStandardMaterial color={isAlarm ? '#ef4444' : '#fbbf24'} transparent opacity={isAlarm ? 0.35 : 0.25} depthWrite={false} />
       </mesh>
       {isAlarm && (
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[size * 4.2, size * 0.12, 8, 32]} />
-          <meshBasicMaterial color="#fca5a5" transparent opacity={0.8} />
-        </mesh>
+        <>
+          <mesh ref={ringRef} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[size * 4.2, size * 0.12, 8, 32]} />
+            <meshBasicMaterial color="#fca5a5" transparent opacity={0.8} depthWrite={false} />
+          </mesh>
+          <mesh ref={strobeRef} position={[0, size * 2.6, 0]}>
+            <coneGeometry args={[size * 0.8, size * 1.2, 16]} />
+            <meshBasicMaterial color="#ef4444" transparent opacity={0.95} />
+          </mesh>
+          <Html center distanceFactor={14} position={[0, size * 4.1, 0]}>
+            <div className="ringing-beacon-label">RINGING</div>
+          </Html>
+        </>
       )}
     </group>
   );
@@ -182,7 +209,7 @@ export default function ModelViewer({
       <IncidentMarker point={incidentPoint} size={markerSize * 1.2} />
 
       {/* Impact zone overlay — updates as timeline scrubs */}
-      <ImpactOverlay frame={currentSimFrame} incidentPoint={incidentPoint} />
+      <ImpactOverlay frame={currentSimFrame} incidentPoint={incidentPoint} scenarioType={currentSimFrame?.scenarioType} />
 
       {/* Calibration points */}
       {calibrationPoints.map((p, i) => (

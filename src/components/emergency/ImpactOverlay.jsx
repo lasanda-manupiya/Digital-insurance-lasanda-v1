@@ -28,8 +28,55 @@ export function IncidentMarker({ point, size = 0.4 }) {
 }
 
 // Render the concentric impact zone spheres for the current simulation frame
-export default function ImpactOverlay({ frame, incidentPoint }) {
-  if (!frame || !incidentPoint || !frame.impactZones?.length) return null;
+function HostageDetectionMarker({ frame, size = 0.45 }) {
+  const detected = (frame?.sensorActivations ?? []).some((activation) => activation.status === 'Activated');
+  const beaconColor = detected ? '#22c55e' : '#fbbf24';
+
+  return (
+    <group>
+      {/* Simple person marker: head, torso and legs, avoiding a large circular radius over the hostage. */}
+      <mesh position={[0, size * 1.75, 0]}>
+        <sphereGeometry args={[size * 0.32, 16, 16]} />
+        <meshStandardMaterial color="#fde68a" emissive="#92400e" emissiveIntensity={0.12} />
+      </mesh>
+      <mesh position={[0, size * 1.05, 0]}>
+        <capsuleGeometry args={[size * 0.22, size * 0.75, 8, 16]} />
+        <meshStandardMaterial color="#38bdf8" />
+      </mesh>
+      <mesh position={[-size * 0.13, size * 0.32, 0]} rotation={[0, 0, -0.15]}>
+        <capsuleGeometry args={[size * 0.08, size * 0.55, 6, 10]} />
+        <meshStandardMaterial color="#1e3a8a" />
+      </mesh>
+      <mesh position={[size * 0.13, size * 0.32, 0]} rotation={[0, 0, 0.15]}>
+        <capsuleGeometry args={[size * 0.08, size * 0.55, 6, 10]} />
+        <meshStandardMaterial color="#1e3a8a" />
+      </mesh>
+
+      {/* Small beacon beside the person shows detection without drawing a hostage radius. */}
+      <mesh position={[size * 0.75, size * 1.55, 0]}>
+        <sphereGeometry args={[size * 0.18, 12, 12]} />
+        <meshStandardMaterial color={beaconColor} emissive={beaconColor} emissiveIntensity={detected ? 1.2 : 0.45} />
+      </mesh>
+      <mesh position={[size * 0.75, size * 1.55, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[size * 0.34, size * 0.025, 8, 24]} />
+        <meshBasicMaterial color={beaconColor} transparent opacity={detected ? 0.85 : 0.45} />
+      </mesh>
+    </group>
+  );
+}
+
+export default function ImpactOverlay({ frame, incidentPoint, scenarioType }) {
+  if (!frame || !incidentPoint) return null;
+
+  if (scenarioType === 'hostage') {
+    return (
+      <group position={[incidentPoint.x, incidentPoint.y, incidentPoint.z]}>
+        <HostageDetectionMarker frame={frame} />
+      </group>
+    );
+  }
+
+  if (!frame.impactZones?.length) return null;
 
   // Sort zones largest-first so smaller (more severe) zones render on top
   const zones = [...frame.impactZones].sort((a, b) => b.radius - a.radius);
