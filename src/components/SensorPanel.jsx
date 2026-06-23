@@ -1,7 +1,7 @@
 // Refactored sensor panel — three tabs: Place | Edit | Coverage.
 // Replaces the previous single-section layout that combined all three concerns.
 
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import {
   SENSOR_TYPES,
   SENSITIVITY_LEVELS,
@@ -36,22 +36,54 @@ function SensorSpecCard({ sensorType, coverageRadiusMetres }) {
   const radius = Number(coverageRadiusMetres ?? meta.defaultRadiusMetres) || 0;
   const example = estimateDetectedTemperature(meta, 40, Math.min(10, radius || 10), 22);
   const exampleDistance = Math.min(10, radius || 10);
+  const specRows = [
+    ['Manufacturer', meta.manufacturer],
+    ['Model / part', [meta.model, meta.partNumber].filter(Boolean).join(' · ')],
+    ['Detection range', `${radius} m`],
+    ['Detection principle', meta.detectionPrinciple],
+    ['Heat classification', meta.heatClass],
+    ['Fixed alarm', meta.fixedAlarmTemperatureC !== undefined ? `${meta.fixedAlarmTemperatureC}°C${meta.fixedAlarmTemperatureF ? ` / ${meta.fixedAlarmTemperatureF}°F` : ''}` : null],
+    ['Rate of rise', meta.rateOfRise],
+    ['Temperature span', meta.minTemperatureC !== undefined ? `${meta.minTemperatureC}°C to ${meta.maxTemperatureC}°C` : null],
+    ['Operating temperature', meta.operatingTemperature],
+    ['Accuracy', meta.accuracyC !== undefined ? `±${meta.accuracyC}°C` : null],
+    ['Response time', meta.responseTimeSeconds !== undefined ? `${meta.responseTimeSeconds}s` : null],
+    ['Field of view', meta.horizontalFovDegrees ? `${meta.horizontalFovDegrees}° H${meta.verticalFovDegrees ? ` × ${meta.verticalFovDegrees}° V` : ''}` : null],
+    ['Lens', meta.lens],
+    ['Resolution', meta.resolution],
+    ['Thermal sensitivity', meta.thermalSensitivity],
+    ['Low-light performance', meta.lowLight],
+    ['Spectral range', meta.spectralRange],
+    ['Frame rate', meta.frameRate],
+    ['Ingress / impact', [meta.ingressProtection, meta.impactRating].filter(Boolean).join(' · ')],
+    ['Dimensions', meta.dimensions],
+    ['Electrical', [meta.operatingVoltage, meta.quiescentCurrent, meta.alarmCurrent].filter(Boolean).join(' · ')],
+    ['Approvals / standards', meta.standards],
+    ['Coverage basis', meta.coverageStandard],
+    ['Analytics / features', meta.analytics],
+    ['Applications', meta.applications],
+    ['Warranty', meta.warranty],
+  ].filter(([, value]) => value);
 
   return (
     <div className="spec-card">
       <div className="spec-card-title">{meta.rangeClass} specification</div>
       <div className="spec-grid">
-        <span>Detection range</span><strong>{radius} m</strong>
-        {meta.minTemperatureC !== undefined && <><span>Temperature span</span><strong>{meta.minTemperatureC}°C to {meta.maxTemperatureC}°C</strong></>}
-        {meta.accuracyC !== undefined && <><span>Accuracy</span><strong>±{meta.accuracyC}°C</strong></>}
-        <span>Response time</span><strong>{meta.responseTimeSeconds}s</strong>
-        {meta.fieldOfViewDegrees && <><span>Field of view</span><strong>{meta.fieldOfViewDegrees}°</strong></>}
-        {meta.resolution && <><span>Resolution</span><strong>{meta.resolution}</strong></>}
+        {specRows.map(([label, value]) => (
+          <Fragment key={label}>
+            <span>{label}</span><strong>{value}</strong>
+          </Fragment>
+        ))}
       </div>
       {example && (
         <p className="hint spec-example">
           Example: a 40°C heat source {exampleDistance} m away in 22°C ambient air is estimated at {example.detectedTemperatureC}°C
           {example.inRange ? ` (${example.deltaFromAmbientC}°C above ambient).` : ' because it is outside the selected range.'}
+        </p>
+      )}
+      {meta.sourceUrl && (
+        <p className="hint spec-example">
+          Source: <a href={meta.sourceUrl} target="_blank" rel="noreferrer">manufacturer / datasheet reference</a>
         </p>
       )}
     </div>
