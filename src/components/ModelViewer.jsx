@@ -4,6 +4,7 @@ import { Grid, Html, Line, OrbitControls, useGLTF } from '@react-three/drei';
 import SensorMarker from './SensorMarker.jsx';
 import CoverageZone from './CoverageZone.jsx';
 import ImpactOverlay, { IncidentMarker } from './emergency/ImpactOverlay.jsx';
+import InsuranceRiskOverlay from './InsuranceRiskOverlay.jsx';
 import { calculateModelDimensions } from '../utils/modelUtils.js';
 
 function ModelObject({ object, fileName, onLoaded, onClickPoint }) {
@@ -89,6 +90,7 @@ export default function ModelViewer({
   onModelLoaded,
   onModelClick,
   onSelectSensor,
+  insuranceOverlays = [],
 }) {
   const maxDim = modelInfo?.maxDimension || 30;
   const markerSize = Math.min(Math.max(maxDim / 80, 0.12), 1.5);
@@ -149,6 +151,8 @@ export default function ModelViewer({
           )}
         </group>
       ))}
+
+      <InsuranceRiskOverlay overlays={insuranceOverlays} />
 
       {/* Emergency incident marker */}
       <IncidentMarker point={incidentPoint} size={markerSize * 1.2} />

@@ -859,3 +859,33 @@ input:focus, select:focus, textarea:focus {
 .spec-example {
   margin-top: 8px;
 }
+
+/* ===================== INSURANCE RISK CHECKLIST ===================== */
+.risk-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin: 12px 0;
+}
+.risk-tab {
+  background: var(--bg);
+  border: 1px solid var(--card-border);
+  color: var(--muted);
+  border-radius: 6px;
+  padding: 7px 8px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.risk-tab:hover { color: var(--text); border-color: var(--accent); }
+.risk-tab.active { background: var(--accent-dim); border-color: rgba(74,222,128,0.5); color: var(--accent); font-weight: 600; }
+.section-title { margin: 14px 0 6px; font-size: 14px; color: var(--text); }
+.score-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+.score-grid div { background: var(--bg); border: 1px solid var(--card-border); border-radius: 8px; padding: 9px; }
+.score-grid span { display:block; color: var(--muted); font-size: 11px; }
+.score-grid strong { display:block; margin-top: 4px; font-size: 18px; color: var(--accent); }
+.checklist-list { display: flex; flex-direction: column; gap: 8px; }
+.checklist-item { border: 1px solid var(--card-border); border-radius: 8px; padding: 10px; background: rgba(11,22,38,0.35); }
+.checklist-head { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+.link-btn { background: none; border: none; color: var(--danger); cursor: pointer; padding: 0 0 0 6px; font: inherit; }
