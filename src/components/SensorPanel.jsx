@@ -138,6 +138,15 @@ function EditTab({ selectedSensor, onUpdate, onDelete }) {
   }
 
   const set = (patch) => onUpdate(selectedSensor.id, patch);
+  const setPosition = (axis, value) => {
+    const next = parseFloat(value);
+    if (Number.isNaN(next)) return;
+    set({ position: { ...selectedSensor.position, [axis]: next } });
+  };
+  const nudgePosition = (axis, amount) => {
+    const current = Number(selectedSensor.position?.[axis]) || 0;
+    set({ position: { ...selectedSensor.position, [axis]: Number((current + amount).toFixed(2)) } });
+  };
 
   const handleTypeChange = (type) => {
     const meta = getSensorTypeMeta(type);
@@ -208,6 +217,31 @@ function EditTab({ selectedSensor, onUpdate, onDelete }) {
           {RISK_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
       </Field>
+
+      <div className="position-editor">
+        <p className="info-label" style={{ marginBottom: 4 }}>Fine tune position</p>
+        <div className="position-grid">
+          {['x', 'y', 'z'].map((axis) => (
+            <Field key={axis} label={`${axis.toUpperCase()} position`}>
+              <input
+                type="number"
+                step="0.1"
+                value={selectedSensor.position[axis].toFixed(2)}
+                onChange={(e) => setPosition(axis, e.target.value)}
+              />
+            </Field>
+          ))}
+        </div>
+        <div className="nudge-grid" aria-label="Sensor position nudge controls">
+          <button className="btn btn-small" onClick={() => nudgePosition('x', -0.25)}>X −</button>
+          <button className="btn btn-small" onClick={() => nudgePosition('x', 0.25)}>X +</button>
+          <button className="btn btn-small" onClick={() => nudgePosition('y', -0.25)}>Down</button>
+          <button className="btn btn-small" onClick={() => nudgePosition('y', 0.25)}>Up</button>
+          <button className="btn btn-small" onClick={() => nudgePosition('z', -0.25)}>Z −</button>
+          <button className="btn btn-small" onClick={() => nudgePosition('z', 0.25)}>Z +</button>
+        </div>
+        <p className="hint">Use Up/Down for vertical movement after loading or reopening a saved project.</p>
+      </div>
 
       <Field label="Notes">
         <textarea rows={2} value={selectedSensor.notes}

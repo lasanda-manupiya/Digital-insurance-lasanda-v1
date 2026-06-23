@@ -346,6 +346,33 @@ input:focus, select:focus, textarea:focus {
 .btn-danger-ghost { color: var(--danger); }
 .btn-small      { padding: 5px 10px; font-size: 12px; }
 
+
+.position-editor {
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 10px;
+  margin: 10px 0;
+  background: rgba(141,162,187,0.05);
+}
+
+.position-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.nudge-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.nudge-grid .btn {
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
 /* ===================== SENSOR PANEL ===================== */
 
 .sensor-tabs {
