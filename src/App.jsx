@@ -18,7 +18,7 @@ import InsuranceRiskChecklistPanel from './components/InsuranceRiskChecklistPane
 
 // Data + utilities
 import { DEFAULT_SCENARIOS } from './data/defaultScenarios.js';
-import { getSensorTypeMeta }  from './data/sensorTypes.js';
+import { SENSOR_TYPES, getSensorTypeMeta }  from './data/sensorTypes.js';
 import { runScenario }        from './utils/riskEngine.js';
 import { DEFAULT_OCCUPANCY }  from './utils/occupancyEngine.js';
 import { DEFAULT_PARAMS }     from './components/emergency/ScenarioConfiguration.jsx';
@@ -67,7 +67,7 @@ export default function App() {
   const [sensors,           setSensors]           = useState(() => loadSensors());
   const [manualTags,        setManualTags]        = useState(() => loadManualTags());
   const [selectedSensorId,  setSelectedSensorId]  = useState(null);
-  const [selectedTypeForPlace, setSelectedTypeForPlace] = useState('Heat Sensor - Short Range');
+  const [selectedTypeForPlace, setSelectedTypeForPlace] = useState(SENSOR_TYPES[0].label);
 
   // ---- interaction mode ----
   // 'orbit' | 'place' | 'calibrate' | 'incident'
@@ -319,7 +319,7 @@ export default function App() {
   // Derive activated sensor IDs for the current frame (so ModelViewer can highlight them)
   const currentSimFrame = simulationResult?.frames?.[currentFrameIndex] ?? null;
   const activatedSensorIds = (currentSimFrame?.sensorActivations ?? [])
-    .filter((a) => a.status === 'Activated')
+    .filter((a) => ['Activated', 'Ringing'].includes(a.status))
     .map((a) => a.sensorId);
 
   const selectedSensor = sensors.find((s) => s.id === selectedSensorId) || null;

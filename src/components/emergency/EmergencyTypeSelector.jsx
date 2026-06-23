@@ -29,6 +29,15 @@ const EMERGENCY_TYPES = [
     riskCategory: 'Security',
   },
   {
+    id: 'hostage',
+    label: 'Hostage',
+    icon: 'H',
+    iconBg: '#7f1d1d',
+    iconColor: '#fecaca',
+    description: 'Camera-confirmed hostage incident that triggers placed alarms.',
+    riskCategory: 'Security',
+  },
+  {
     id: 'flood',
     label: 'Flood',
     icon: 'W',
