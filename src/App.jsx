@@ -63,6 +63,11 @@ export default function App() {
   const [modelInfo,    setModelInfo]    = useState(null);
   const [modelLoading, setModelLoading] = useState(false);
   const [viewerZoom, setViewerZoom] = useState(1);
+  const [verticalPointer, setVerticalPointer] = useState({
+    enabled: false,
+    position: null,
+    height: 0,
+  });
 
   // ---- sensor state ----
   const [sensors,           setSensors]           = useState(() => loadSensors());
@@ -112,6 +117,17 @@ export default function App() {
   // ---- model callbacks ----
   const handleModelLoaded = useCallback((info) => setModelInfo(info), []);
 
+  useEffect(() => {
+    if (!modelInfo?.boundingBox) return;
+    const { min, max } = modelInfo.boundingBox;
+    const center = modelInfo.center ?? { x: 0, y: (min.y + max.y) / 2, z: 0 };
+    setVerticalPointer((prev) => ({
+      ...prev,
+      position: prev.position ?? { x: center.x, y: min.y, z: center.z },
+      height: Math.min(max.y, Math.max(min.y, prev.height || center.y)),
+    }));
+  }, [modelInfo]);
+
   const handleModelClick = useCallback(
     (point) => {
       if (interactionMode === 'place') {
@@ -145,9 +161,15 @@ export default function App() {
       } else if (interactionMode === 'tag') {
         setPendingTagPoint(point);
         setInteractionMode('orbit');
+      } else if (verticalPointer.enabled) {
+        setVerticalPointer((prev) => ({
+          ...prev,
+          position: { x: point.x, y: point.y, z: point.z },
+          height: prev.height || point.y,
+        }));
       }
     },
-    [interactionMode, selectedTypeForPlace]
+    [interactionMode, selectedTypeForPlace, verticalPointer.enabled]
   );
 
   // ---- sensor operations ----
@@ -324,6 +346,9 @@ export default function App() {
     .map((a) => a.sensorId);
 
   const selectedSensor = sensors.find((s) => s.id === selectedSensorId) || null;
+  const pointerBounds = modelInfo?.boundingBox
+    ? { min: modelInfo.boundingBox.min.y, max: modelInfo.boundingBox.max.y }
+    : { min: -10, max: 10 };
   const insuranceAssessment = assessRiskCategory('fire', { sensors, manualTags, modelInfo, projectSettings, occupancyConfig });
   const insuranceOverlays = buildRiskOverlays(insuranceAssessment);
 
@@ -375,8 +400,39 @@ export default function App() {
             onSelectSensor={setSelectedSensorId}
             insuranceOverlays={insuranceOverlays}
             zoomLevel={viewerZoom}
+            verticalPointer={verticalPointer}
           />
 
+
+          {/* Vertical surface pointer control */}
+          <div className="vertical-pointer-control" aria-label="Vertical surface pointer controls">
+            <button
+              type="button"
+              className={verticalPointer.enabled ? 'pointer-toggle active' : 'pointer-toggle'}
+              onClick={() => setVerticalPointer((prev) => ({ ...prev, enabled: !prev.enabled }))}
+              title="Toggle vertical pointer"
+            >
+              ↕ Pointer
+            </button>
+            {verticalPointer.enabled && (
+              <>
+                <p>Click the model to move the pointer across the layout.</p>
+                <label>
+                  Height
+                  <input
+                    type="range"
+                    min={pointerBounds.min}
+                    max={pointerBounds.max}
+                    step={Math.max((pointerBounds.max - pointerBounds.min) / 200, 0.01)}
+                    value={verticalPointer.height}
+                    onChange={(event) => setVerticalPointer((prev) => ({ ...prev, height: Number(event.target.value) }))}
+                    aria-label="Move vertical pointer up or down"
+                  />
+                </label>
+                <span>Y {verticalPointer.height.toFixed(2)}</span>
+              </>
+            )}
+          </div>
 
           {/* Vertical zoom control */}
           <div className="viewer-zoom-control" aria-label="Model zoom controls">
