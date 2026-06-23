@@ -6,6 +6,7 @@ import CoverageZone from './CoverageZone.jsx';
 import ImpactOverlay, { IncidentMarker } from './emergency/ImpactOverlay.jsx';
 import InsuranceRiskOverlay from './InsuranceRiskOverlay.jsx';
 import { calculateModelDimensions } from '../utils/modelUtils.js';
+import { getSensorTypeMeta } from '../data/sensorTypes.js';
 
 function ModelObject({ object, fileName, onLoaded, onClickPoint }) {
   const reportedFor = useRef(null);
@@ -67,11 +68,21 @@ class ModelErrorBoundary extends Component {
 
 // Pulsing activated sensor indicator (shown during simulation)
 function ActivatedSensorGlow({ sensor, size }) {
+  const meta = getSensorTypeMeta(sensor.type);
+  const isAlarm = meta.family === 'Alarm';
   return (
-    <mesh position={[sensor.position.x, sensor.position.y, sensor.position.z]} raycast={() => null}>
-      <sphereGeometry args={[size * 2.2, 12, 12]} />
-      <meshStandardMaterial color="#fbbf24" transparent opacity={0.25} depthWrite={false} />
-    </mesh>
+    <group position={[sensor.position.x, sensor.position.y, sensor.position.z]} raycast={() => null}>
+      <mesh>
+        <sphereGeometry args={[size * (isAlarm ? 3.2 : 2.2), 16, 16]} />
+        <meshStandardMaterial color={isAlarm ? '#ef4444' : '#fbbf24'} transparent opacity={isAlarm ? 0.35 : 0.25} depthWrite={false} />
+      </mesh>
+      {isAlarm && (
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[size * 4.2, size * 0.12, 8, 32]} />
+          <meshBasicMaterial color="#fca5a5" transparent opacity={0.8} />
+        </mesh>
+      )}
+    </group>
   );
 }
 

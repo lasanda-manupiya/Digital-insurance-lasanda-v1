@@ -62,7 +62,7 @@ export default function ResultsPanel({ simulationResult, onViewIn3D, onReset }) 
     : fs.riskLevel === 'Medium' ? '#f97316' : '#4ade80';
 
   const activations = (s.frames?.[s.frames.length - 1]?.sensorActivations ?? []);
-  const activated   = activations.filter((a) => a.status === 'Activated');
+  const activated   = activations.filter((a) => ['Activated', 'Ringing'].includes(a.status));
   const outOfRange  = activations.filter((a) => a.status === 'Out of range');
   const unsuitable  = activations.filter((a) => a.status === 'Unsuitable');
 
@@ -130,7 +130,7 @@ export default function ResultsPanel({ simulationResult, onViewIn3D, onReset }) 
             {activated.map((a) => (
               <li key={a.sensorId} style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span>{a.sensorName}</span>
-                <span className="muted">activated at {formatTime(a.activationTime)}</span>
+                <span className="muted">{a.status === 'Ringing' ? 'ringing' : 'activated'} at {formatTime(a.activationTime)}</span>
               </li>
             ))}
           </ul>

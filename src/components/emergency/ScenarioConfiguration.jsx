@@ -118,6 +118,36 @@ function RiotConfig({ params, set }) {
   );
 }
 
+// ---------- Hostage ----------
+function HostageConfig({ params, set }) {
+  return (
+    <>
+      <Row>
+        <Field label="Estimated hostages / occupants at risk">
+          <input type="number" min="1" max="200"
+            value={params.hostageCount}
+            onChange={(e) => set({ hostageCount: Number(e.target.value) || 1 })} />
+        </Field>
+        <Select label="Incident movement" value={params.movementSpeed} onChange={(v) => set({ movementSpeed: v })}
+          options={['Slow', 'Medium', 'Fast']} />
+      </Row>
+      <Field label="Security response time (minutes)"
+        hint="Time from camera confirmation until trained responders are on scene.">
+        <input type="number" min="1" max="60"
+          value={params.securityResponseTime}
+          onChange={(e) => set({ securityResponseTime: Number(e.target.value) || 5 })} />
+      </Field>
+      <Field label="Duration (seconds)">
+        <input type="number" min="60" max="3600" step="60"
+          value={params.durationSeconds}
+          onChange={(e) => set({ durationSeconds: Number(e.target.value) || 600 })} />
+      </Field>
+      <Toggle label="Lockdown protocol active"
+        checked={!!params.lockdownActive} onChange={(v) => set({ lockdownActive: v })} />
+    </>
+  );
+}
+
 // ---------- Flood ----------
 function FloodConfig({ params, set }) {
   return (
@@ -176,6 +206,8 @@ export const DEFAULT_PARAMS = {
   explosion: { blastIntensity: 'Medium', structuralVulnerability: 'Medium', durationSeconds: 600 },
   riot:      { crowdSize: 20, movementSpeed: 'Medium', securityResponseTime: 5,
                durationSeconds: 600, lockdownActive: false },
+  hostage:   { hostageCount: 1, movementSpeed: 'Slow', securityResponseTime: 5,
+               durationSeconds: 600, lockdownActive: true },
   flood:     { initialDepth: 0.2, inflowRate: 'Medium', drainageCapacity: 0.01, durationSeconds: 600 },
   gasLeak:   { gasType: 'Natural Gas', leakRate: 'Medium', ventilationCondition: 'Normal', durationSeconds: 600 },
 };
@@ -190,6 +222,7 @@ export default function ScenarioConfiguration({ emergencyType, params, onParamsC
       {emergencyType === 'fire'      && <FireConfig      params={params} set={set} />}
       {emergencyType === 'explosion' && <ExplosionConfig params={params} set={set} />}
       {emergencyType === 'riot'      && <RiotConfig      params={params} set={set} />}
+      {emergencyType === 'hostage'   && <HostageConfig   params={params} set={set} />}
       {emergencyType === 'flood'     && <FloodConfig     params={params} set={set} />}
       {emergencyType === 'gasLeak'   && <GasLeakConfig   params={params} set={set} />}
       <p className="hint" style={{ marginTop: 10 }}>

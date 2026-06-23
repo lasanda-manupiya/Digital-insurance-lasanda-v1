@@ -5,6 +5,7 @@
 import { computeFireFrames, generateFireRecommendations }           from './fireSimulation.js';
 import { computeExplosionFrames, generateExplosionRecommendations } from './explosionSimulation.js';
 import { computeRiotFrames, generateRiotRecommendations }           from './riotSimulation.js';
+import { computeHostageFrames, generateHostageRecommendations }     from './hostageSimulation.js';
 import { computeFloodFrames, generateFloodRecommendations }         from './floodSimulation.js';
 import { computeGasLeakFrames, generateGasLeakRecommendations }     from './gasLeakSimulation.js';
 import { getActivatedSensors, getFirstDetectionTime }               from './sensorActivationEngine.js';
@@ -19,6 +20,7 @@ const TYPE_LABELS = {
   fire:      'Fire',
   explosion: 'Explosion',
   riot:      'Riot / Unauthorised Entry',
+  hostage:   'Hostage Situation',
   flood:     'Flood',
   gasLeak:   'Gas Leak',
 };
@@ -53,6 +55,11 @@ export function runEmergencySimulation(config, sensors, occupancy, modelInfo, sc
     case 'riot': {
       frames = computeRiotFrames(config, sensors, occupancy, modelInfo, scaleFactor);
       recommendations = generateRiotRecommendations(frames, config, sensors);
+      break;
+    }
+    case 'hostage': {
+      frames = computeHostageFrames(config, sensors, occupancy, modelInfo, scaleFactor);
+      recommendations = generateHostageRecommendations(frames, config, sensors);
       break;
     }
     case 'flood': {
@@ -147,8 +154,11 @@ function buildDataLimitations(config, sensors, modelInfo) {
   const lims = [];
   if (!modelInfo) lims.push('Model dimensions not confirmed — spatial calculations are approximate.');
   if (sensors.length === 0) lims.push('No sensors placed — sensor activation analysis unavailable.');
-  if (config.type === 'fire' && !sensors.some((s) => ['Fire Sensor','Heat Sensor','Smoke Sensor'].includes(s.type))) {
-    lims.push('No fire detection sensors — first detection time cannot be calculated.');
+  if (config.type === 'fire' && !sensors.some((s) => /heat|thermal/i.test(s.type))) {
+    lims.push('No heat or thermal detection sensors — first detection time cannot be calculated.');
+  }
+  if (config.type === 'hostage' && !sensors.some((s) => /camera/i.test(s.type) && !/thermal/i.test(s.type))) {
+    lims.push('No visual cameras placed — hostage detection and alarm triggering cannot be calculated.');
   }
   lims.push('Room boundaries and door positions are not modelled — spread may differ in practice.');
   lims.push('Occupancy distribution is estimated — actual impact depends on real occupancy data.');

@@ -67,7 +67,7 @@ export function generateRiotRecommendations(frames, config, sensors) {
   const p = config.params ?? {};
 
   const secSensors = sensors.filter((s) =>
-    s.type.startsWith('Visual Camera')
+    (/camera/i.test(s.type) && !/thermal/i.test(s.type))
   );
   if (secSensors.length < 2) {
     recs.push({ priority: 'High', text: 'Insufficient security sensors near entry points. Add visual camera coverage.' });

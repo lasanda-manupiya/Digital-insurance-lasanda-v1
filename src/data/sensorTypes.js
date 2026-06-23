@@ -231,6 +231,23 @@ export const SENSOR_TYPES = [
     sourceUrl: 'https://www.axis.com/dam/public/2b/1e/73/datasheet-axis-p3245%E2%80%93v-network-camera-en-US-352164.pdf',
     guidance: 'Use for visible-light security verification at entrances, corridors, counters, public areas, and CCTV coverage blind spots.',
   },
+
+  {
+    label: 'Emergency Alarm Beacon / Siren',
+    riskCategory: 'Security',
+    color: '#ef4444',
+    defaultRadiusMetres: 18,
+    floorBased: false,
+    family: 'Alarm',
+    rangeClass: 'Placeable audible / visual alarm beacon',
+    manufacturer: 'Generic life-safety device',
+    model: 'Siren + strobe node',
+    detectionPrinciple: 'Receives alarm trigger from nearby detecting sensors and rings/strobes for evacuation warning',
+    responseTimeSeconds: 1,
+    acousticOutput: 'Ambulance-style audible alarm with flashing visual beacon',
+    applications: 'Entrances, corridors, gathering points, hostage response zones, incident command points, plant rooms and other user-selected alarm locations',
+    guidance: 'Place alarms where people need to hear or see the warning. They do not detect incidents directly; they ring when a nearby detector or camera confirms the incident.',
+  },
 ];
 
 export const SENSITIVITY_LEVELS = ['Low', 'Medium', 'High'];
