@@ -10,6 +10,16 @@ function formatTime(seconds) {
   return s > 0 ? `${m}m ${s}s` : `${m}m`;
 }
 
+function getFrameIndexAtTime(frames, elapsedSeconds) {
+  if (!frames?.length) return 0;
+  let selected = 0;
+  for (let i = 0; i < frames.length; i += 1) {
+    if ((frames[i]?.timeSeconds ?? 0) <= elapsedSeconds) selected = i;
+    else break;
+  }
+  return selected;
+}
+
 export default function SimulationTimeline({
   frames,
   currentFrameIndex,
@@ -19,27 +29,44 @@ export default function SimulationTimeline({
 }) {
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
-  const intervalRef = useRef(null);
+  const playbackRef = useRef({ startedAtMs: 0, startTimeSeconds: 0 });
 
   const totalFrames = frames?.length ?? 0;
   const currentFrame = frames?.[currentFrameIndex] ?? null;
 
-  // Auto-advance during playback
+  // Auto-advance during playback. 1× is true wall-clock time; higher values are
+  // explicit fast-forward options so the user can choose between live timing and review speed.
   useEffect(() => {
-    if (!playing) { clearInterval(intervalRef.current); return; }
-    const delayMs = (800 / speed);
-    intervalRef.current = setInterval(() => {
-      onFrameChange((prev) => {
-        if (prev >= totalFrames - 1) { setPlaying(false); return prev; }
-        return prev + 1;
-      });
-    }, delayMs);
-    return () => clearInterval(intervalRef.current);
-  }, [playing, speed, totalFrames, onFrameChange]);
+    if (!playing || !totalFrames) return undefined;
+
+    playbackRef.current = {
+      startedAtMs: Date.now(),
+      startTimeSeconds: currentFrame?.timeSeconds ?? 0,
+    };
+
+    const intervalId = setInterval(() => {
+      const { startedAtMs, startTimeSeconds } = playbackRef.current;
+      const elapsedWallSeconds = (Date.now() - startedAtMs) / 1000;
+      const targetTimeSeconds = startTimeSeconds + elapsedWallSeconds * speed;
+      const nextIndex = getFrameIndexAtTime(frames, targetTimeSeconds);
+
+      if (nextIndex >= totalFrames - 1) {
+        onFrameChange(totalFrames - 1);
+        const finalTime = frames[totalFrames - 1]?.timeSeconds ?? 0;
+        if (targetTimeSeconds >= finalTime) setPlaying(false);
+        return;
+      }
+
+      onFrameChange(nextIndex);
+    }, 250);
+
+    return () => clearInterval(intervalId);
+  }, [playing, speed, totalFrames, frames, currentFrame?.timeSeconds, onFrameChange]);
 
   if (!totalFrames) return null;
 
   const activatedCount = (currentFrame?.sensorActivations ?? []).filter((a) => a.status === 'Activated').length;
+  const ringingCount = (currentFrame?.sensorActivations ?? []).filter((a) => a.status === 'Ringing').length;
   const affectedPeople = currentFrame?.occupancyImpact?.totalAffected ?? 0;
   const riskZones = currentFrame?.impactZones ?? [];
   const topRisk = riskZones[0]?.level ?? 'unknown'; // first zone is most severe
@@ -57,7 +84,7 @@ export default function SimulationTimeline({
           T = {formatTime(currentFrame?.timeSeconds ?? 0)}
         </span>
         <span className="sim-chip" style={{ background: `${IMPACT_LEVELS[topRisk]?.color}22`, color: IMPACT_LEVELS[topRisk]?.color }}>
-          {IMPACT_LEVELS[topRisk]?.label ?? 'Safe'}
+          {scenarioType === 'hostage' ? 'Detected incident marker' : (IMPACT_LEVELS[topRisk]?.label ?? 'Safe')}
         </span>
         <span className="sim-chip">
           {affectedPeople} people affected
@@ -66,8 +93,8 @@ export default function SimulationTimeline({
           {activatedCount} sensor{activatedCount !== 1 ? 's' : ''} activated
         </span>
         {currentFrame?.alarmActive && (
-          <span className="sim-chip" style={{ background: 'rgba(248,113,113,0.14)', color: '#ef4444' }}>
-            Alarm active
+          <span className="sim-chip sim-chip-alarm">
+            {ringingCount || 'Alarm'} beacon{ringingCount === 1 ? '' : 's'} ringing
           </span>
         )}
       </div>
@@ -77,7 +104,7 @@ export default function SimulationTimeline({
         <button className="btn btn-small" title="Reset" onClick={() => { setPlaying(false); onFrameChange(0); }}>
           &#9632; Reset
         </button>
-        <button className="btn btn-small" onClick={() => onFrameChange((p) => Math.max(0, p - 1))}>
+        <button className="btn btn-small" onClick={() => { setPlaying(false); onFrameChange((p) => Math.max(0, p - 1)); }}>
           &#9664;
         </button>
         <button
@@ -89,7 +116,7 @@ export default function SimulationTimeline({
         >
           {playing ? '&#9646;&#9646; Pause' : '&#9654; Play'}
         </button>
-        <button className="btn btn-small" onClick={() => onFrameChange((p) => Math.min(totalFrames - 1, p + 1))}>
+        <button className="btn btn-small" onClick={() => { setPlaying(false); onFrameChange((p) => Math.min(totalFrames - 1, p + 1)); }}>
           &#9654;
         </button>
 
@@ -105,12 +132,14 @@ export default function SimulationTimeline({
         <select
           value={speed}
           onChange={(e) => setSpeed(Number(e.target.value))}
-          style={{ width: 70 }}
+          style={{ width: 112 }}
+          title="Playback speed: 1× runs in real time; higher values fast-forward."
         >
-          <option value={0.5}>0.5×</option>
-          <option value={1}>1×</option>
-          <option value={2}>2×</option>
-          <option value={4}>4×</option>
+          <option value={1}>1× real time</option>
+          <option value={2}>2× fast</option>
+          <option value={4}>4× fast</option>
+          <option value={10}>10× fast</option>
+          <option value={30}>30× review</option>
         </select>
       </div>
 

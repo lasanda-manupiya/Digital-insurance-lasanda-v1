@@ -967,3 +967,27 @@ input:focus, select:focus, textarea:focus {
   font-size: 11px;
   text-align: center;
 }
+
+.sim-chip-alarm {
+  background: rgba(248, 113, 113, 0.18);
+  color: #fecaca;
+  animation: alarm-chip-pulse 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes alarm-chip-pulse {
+  from { box-shadow: 0 0 0 rgba(248, 113, 113, 0); }
+  to { box-shadow: 0 0 14px rgba(248, 113, 113, 0.45); }
+}
+
+.ringing-beacon-label {
+  padding: 2px 6px;
+  border: 1px solid rgba(248, 113, 113, 0.75);
+  border-radius: 999px;
+  background: rgba(127, 29, 29, 0.82);
+  color: #fecaca;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  animation: alarm-chip-pulse 0.8s ease-in-out infinite alternate;
+}
