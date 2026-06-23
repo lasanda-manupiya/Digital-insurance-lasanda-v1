@@ -4,6 +4,7 @@ const MODES = [
   { id: 'model',     label: 'Model',      hint: 'Model info and scale calibration' },
   { id: 'sensors',   label: 'Sensors',    hint: 'Place, edit and review coverage' },
   { id: 'emergency', label: 'Emergency',  hint: 'Emergency simulation wizard' },
+  { id: 'insurance', label: 'Insurance checklist', hint: 'Insurance readiness checklist and risk reduction' },
   { id: 'results',   label: 'Results',    hint: 'Simulation results and recommendations' },
 ];
 

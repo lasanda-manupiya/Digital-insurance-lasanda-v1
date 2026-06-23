@@ -2,6 +2,7 @@
 const SENSORS_KEY = 'twinrisk.sensors';
 const SCALE_KEY = 'twinrisk.scaleSettings';
 const PROJECT_KEY = 'twinrisk.projectSettings';
+const MANUAL_TAGS_KEY = 'twinrisk.manualTags';
 
 function load(key, fallback) {
   try {
@@ -32,6 +33,14 @@ export function clearSensors() {
   localStorage.removeItem(SENSORS_KEY);
 }
 
+export function saveManualTags(tags) {
+  save(MANUAL_TAGS_KEY, tags);
+}
+
+export function loadManualTags() {
+  return load(MANUAL_TAGS_KEY, []);
+}
+
 export function saveScaleSettings(scaleSettings) {
   save(SCALE_KEY, scaleSettings);
 }
@@ -52,7 +61,7 @@ export function loadProjectSettings() {
 
 const PROJECT_FILE_VERSION = 1;
 
-export function buildProjectFile({ sensors, scaleSettings, projectSettings, modelFileName }) {
+export function buildProjectFile({ sensors, scaleSettings, projectSettings, manualTags = [], modelFileName }) {
   return {
     app: 'twinrisk-ai-demo',
     version: PROJECT_FILE_VERSION,
@@ -60,6 +69,7 @@ export function buildProjectFile({ sensors, scaleSettings, projectSettings, mode
     modelFileName,
     scaleSettings,
     projectSettings,
+    manualTags,
     sensors,
   };
 }

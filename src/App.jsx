@@ -14,6 +14,7 @@ import SensorPanel          from './components/SensorPanel.jsx';
 import EmergencyWizard      from './components/emergency/EmergencyWizard.jsx';
 import SimulationTimeline   from './components/emergency/SimulationTimeline.jsx';
 import ResultsPanel         from './components/emergency/ResultsPanel.jsx';
+import InsuranceRiskChecklistPanel from './components/InsuranceRiskChecklistPanel.jsx';
 
 // Data + utilities
 import { DEFAULT_SCENARIOS } from './data/defaultScenarios.js';
@@ -22,8 +23,10 @@ import { runScenario }        from './utils/riskEngine.js';
 import { DEFAULT_OCCUPANCY }  from './utils/occupancyEngine.js';
 import { DEFAULT_PARAMS }     from './components/emergency/ScenarioConfiguration.jsx';
 import { runEmergencySimulation } from './utils/emergencySimulationEngine.js';
+import { assessRiskCategory, buildRiskOverlays } from './utils/insuranceRiskEngine.js';
 import {
   loadSensors, saveSensors, clearSensors,
+  loadManualTags, saveManualTags,
   loadScaleSettings, saveScaleSettings,
   loadProjectSettings, saveProjectSettings,
   buildProjectFile, downloadProjectFile, parseProjectFile,
@@ -62,6 +65,7 @@ export default function App() {
 
   // ---- sensor state ----
   const [sensors,           setSensors]           = useState(() => loadSensors());
+  const [manualTags,        setManualTags]        = useState(() => loadManualTags());
   const [selectedSensorId,  setSelectedSensorId]  = useState(null);
   const [selectedTypeForPlace, setSelectedTypeForPlace] = useState('Heat Sensor - Short Range');
 
@@ -69,6 +73,7 @@ export default function App() {
   // 'orbit' | 'place' | 'calibrate' | 'incident'
   const [interactionMode, setInteractionMode] = useState('orbit');
   const [calibrationPoints, setCalibrationPoints] = useState([]);
+  const [pendingTagPoint, setPendingTagPoint] = useState(null);
 
   // ---- scale / project settings ----
   const [scaleSettings,   setScaleSettings]   = useState(() => loadScaleSettings()   || DEFAULT_SCALE);
@@ -99,6 +104,7 @@ export default function App() {
 
   // ---- persistence side-effects ----
   useEffect(() => saveSensors(sensors),           [sensors]);
+  useEffect(() => saveManualTags(manualTags),     [manualTags]);
   useEffect(() => saveScaleSettings(scaleSettings), [scaleSettings]);
   useEffect(() => saveProjectSettings(projectSettings), [projectSettings]);
 
@@ -135,6 +141,9 @@ export default function App() {
       } else if (interactionMode === 'incident') {
         setIncidentPoint(point);
         setInteractionMode('orbit');
+      } else if (interactionMode === 'tag') {
+        setPendingTagPoint(point);
+        setInteractionMode('orbit');
       }
     },
     [interactionMode, selectedTypeForPlace]
@@ -148,6 +157,13 @@ export default function App() {
     setSensors((prev) => prev.filter((s) => s.id !== id));
     if (selectedSensorId === id) setSelectedSensorId(null);
   };
+
+  const addManualTag = (tag) => {
+    setManualTags((prev) => [...prev, { ...tag, id: `T${String(prev.length + 1).padStart(3, '0')}` }]);
+    setPendingTagPoint(null);
+  };
+
+  const deleteManualTag = (id) => setManualTags((prev) => prev.filter((t) => t.id !== id));
 
   const handleClearAll = () => {
     if (!window.confirm('Delete all sensors?')) return;
@@ -217,7 +233,7 @@ export default function App() {
   // ---- project save / open ----
   const handleSaveProject = () => {
     const data = buildProjectFile({
-      sensors, scaleSettings, projectSettings,
+      sensors, scaleSettings, projectSettings, manualTags,
       modelFileName: modelSource.fileName,
     });
     const stamp = new Date().toISOString().slice(0, 10);
@@ -233,6 +249,7 @@ export default function App() {
       setSensors(data.sensors);
       if (data.scaleSettings)   setScaleSettings(data.scaleSettings);
       if (data.projectSettings) setProjectSettings(data.projectSettings);
+      if (Array.isArray(data.manualTags)) setManualTags(data.manualTags);
       setSelectedSensorId(null);
       setScenarioResults([]);
       if (data.modelFileName && data.modelFileName !== modelSource.fileName) {
@@ -306,6 +323,8 @@ export default function App() {
     .map((a) => a.sensorId);
 
   const selectedSensor = sensors.find((s) => s.id === selectedSensorId) || null;
+  const insuranceAssessment = assessRiskCategory('fire', { sensors, manualTags, modelInfo, projectSettings, occupancyConfig });
+  const insuranceOverlays = buildRiskOverlays(insuranceAssessment);
 
   // Viewer toolbar text
   const modeChip = {
@@ -313,6 +332,7 @@ export default function App() {
     place:    'Place mode — click model to drop a sensor',
     calibrate:'Calibration mode — click two reference points',
     incident: 'Incident placement — click model to set emergency location',
+    tag:      'Manual tagging — click model to tag infrastructure or evidence',
   }[interactionMode] ?? '';
 
   return (
@@ -352,6 +372,7 @@ export default function App() {
             onModelLoaded={handleModelLoaded}
             onModelClick={handleModelClick}
             onSelectSensor={setSelectedSensorId}
+            insuranceOverlays={insuranceOverlays}
           />
 
           {/* Mode chip overlay */}
@@ -436,6 +457,22 @@ export default function App() {
                 onParamsChange={setScenarioParams}
                 onOccupancyChange={setOccupancyConfig}
                 onRunSimulation={handleRunSimulation}
+              />
+            )}
+
+            {/* INSURANCE CHECKLIST mode */}
+            {appMode === 'insurance' && (
+              <InsuranceRiskChecklistPanel
+                sensors={sensors}
+                manualTags={manualTags}
+                pendingTagPoint={pendingTagPoint}
+                modelInfo={modelInfo}
+                projectSettings={projectSettings}
+                occupancyConfig={occupancyConfig}
+                onStartTagging={() => setInteractionMode('tag')}
+                onAddManualTag={addManualTag}
+                onDeleteManualTag={deleteManualTag}
+                onUpdateOccupancy={setOccupancyConfig}
               />
             )}
 
