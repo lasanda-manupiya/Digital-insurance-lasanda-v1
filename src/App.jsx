@@ -62,6 +62,7 @@ export default function App() {
   });
   const [modelInfo,    setModelInfo]    = useState(null);
   const [modelLoading, setModelLoading] = useState(false);
+  const [viewerZoom, setViewerZoom] = useState(1);
 
   // ---- sensor state ----
   const [sensors,           setSensors]           = useState(() => loadSensors());
@@ -373,7 +374,41 @@ export default function App() {
             onModelClick={handleModelClick}
             onSelectSensor={setSelectedSensorId}
             insuranceOverlays={insuranceOverlays}
+            zoomLevel={viewerZoom}
           />
+
+
+          {/* Vertical zoom control */}
+          <div className="viewer-zoom-control" aria-label="Model zoom controls">
+            <button
+              type="button"
+              className="zoom-button"
+              onClick={() => setViewerZoom((zoom) => Math.min(2.5, Number((zoom + 0.1).toFixed(2))))}
+              aria-label="Zoom in"
+            >
+              +
+            </button>
+            <input
+              type="range"
+              min="0.5"
+              max="2.5"
+              step="0.05"
+              value={viewerZoom}
+              onChange={(event) => setViewerZoom(Number(event.target.value))}
+              className="zoom-slider"
+              aria-label="Zoom model in or out"
+              aria-orientation="vertical"
+            />
+            <button
+              type="button"
+              className="zoom-button"
+              onClick={() => setViewerZoom((zoom) => Math.max(0.5, Number((zoom - 0.1).toFixed(2))))}
+              aria-label="Zoom out"
+            >
+              −
+            </button>
+            <span className="zoom-value">{Math.round(viewerZoom * 100)}%</span>
+          </div>
 
           {/* Mode chip overlay */}
           <div className="viewer-toolbar">
