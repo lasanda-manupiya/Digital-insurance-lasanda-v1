@@ -916,3 +916,54 @@ input:focus, select:focus, textarea:focus {
 .checklist-item { border: 1px solid var(--card-border); border-radius: 8px; padding: 10px; background: rgba(11,22,38,0.35); }
 .checklist-head { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
 .link-btn { background: none; border: none; color: var(--danger); cursor: pointer; padding: 0 0 0 6px; font: inherit; }
+
+.viewer-zoom-control {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px;
+  background: rgba(15, 29, 49, 0.9);
+  border: 1px solid var(--card-border);
+  border-radius: 999px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+}
+
+.zoom-button {
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(74, 222, 128, 0.35);
+  border-radius: 50%;
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-size: 20px;
+  line-height: 1;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.zoom-button:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.zoom-slider {
+  width: 130px;
+  height: 28px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  transform: rotate(-90deg);
+  margin: 52px -50px;
+}
+
+.zoom-value {
+  min-width: 38px;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+}

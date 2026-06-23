@@ -1,5 +1,5 @@
 import { Component, Suspense, useEffect, useRef } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
 import { Grid, Html, Line, OrbitControls, useGLTF } from '@react-three/drei';
 import SensorMarker from './SensorMarker.jsx';
 import CoverageZone from './CoverageZone.jsx';
@@ -31,6 +31,17 @@ function ModelObject({ object, fileName, onLoaded, onClickPoint }) {
       }}
     />
   );
+}
+
+function CameraZoomController({ zoomLevel }) {
+  const { camera } = useThree();
+
+  useEffect(() => {
+    camera.zoom = zoomLevel;
+    camera.updateProjectionMatrix();
+  }, [camera, zoomLevel]);
+
+  return null;
 }
 
 function GltfModel({ url, fileName, onLoaded, onClickPoint }) {
@@ -102,6 +113,7 @@ export default function ModelViewer({
   onModelClick,
   onSelectSensor,
   insuranceOverlays = [],
+  zoomLevel = 1,
 }) {
   const maxDim = modelInfo?.maxDimension || 30;
   const markerSize = Math.min(Math.max(maxDim / 80, 0.12), 1.5);
@@ -113,6 +125,7 @@ export default function ModelViewer({
       camera={{ position: [maxDim * 1.2, maxDim * 0.8, maxDim * 1.2], fov: 50, near: 0.1, far: maxDim * 40 }}
       onPointerMissed={() => onSelectSensor(null)}
     >
+      <CameraZoomController zoomLevel={zoomLevel} />
       <color attach="background" args={['#0b1626']} />
       <ambientLight intensity={0.7} />
       <directionalLight position={[30, 50, 20]}  intensity={1.4} />
