@@ -124,6 +124,51 @@ function ActivatedSensorGlow({ sensor, size }) {
   );
 }
 
+function VerticalSurfacePointer({ pointer, modelInfo, size }) {
+  if (!pointer?.enabled || !pointer.position || !modelInfo?.boundingBox) return null;
+
+  const { min, max } = modelInfo.boundingBox;
+  const x = pointer.position.x;
+  const z = pointer.position.z;
+  const y = pointer.height;
+  const baseY = min.y;
+  const topY = max.y;
+  const headSize = size * 0.9;
+
+  return (
+    <group raycast={() => null}>
+      <Line
+        points={[
+          [x, baseY, z],
+          [x, topY, z],
+        ]}
+        color="#38bdf8"
+        lineWidth={4}
+        dashed
+        dashSize={size * 1.8}
+        gapSize={size * 0.8}
+      />
+      <mesh position={[x, y, z]}>
+        <sphereGeometry args={[headSize, 24, 24]} />
+        <meshStandardMaterial color="#38bdf8" emissive="#0ea5e9" emissiveIntensity={0.8} />
+      </mesh>
+      <mesh position={[x, y + headSize * 1.8, z]} rotation={[Math.PI, 0, 0]}>
+        <coneGeometry args={[headSize * 0.75, headSize * 1.5, 24]} />
+        <meshStandardMaterial color="#f8fafc" emissive="#38bdf8" emissiveIntensity={0.35} />
+      </mesh>
+      <mesh position={[x, baseY + 0.02, z]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[headSize * 1.7, headSize * 0.08, 8, 40]} />
+        <meshBasicMaterial color="#38bdf8" transparent opacity={0.85} depthWrite={false} />
+      </mesh>
+      <Html center distanceFactor={14} position={[x, y + headSize * 3.1, z]}>
+        <div className="vertical-pointer-label">
+          Y {y.toFixed(2)}
+        </div>
+      </Html>
+    </group>
+  );
+}
+
 export default function ModelViewer({
   modelSource,
   modelInfo,
@@ -141,6 +186,7 @@ export default function ModelViewer({
   onSelectSensor,
   insuranceOverlays = [],
   zoomLevel = 1,
+  verticalPointer,
 }) {
   const maxDim = modelInfo?.maxDimension || 30;
   const markerSize = Math.min(Math.max(maxDim / 80, 0.12), 1.5);
@@ -204,6 +250,8 @@ export default function ModelViewer({
       ))}
 
       <InsuranceRiskOverlay overlays={insuranceOverlays} />
+
+      <VerticalSurfacePointer pointer={verticalPointer} modelInfo={modelInfo} size={markerSize} />
 
       {/* Emergency incident marker */}
       <IncidentMarker point={incidentPoint} size={markerSize * 1.2} />
